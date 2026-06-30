@@ -1,174 +1,53 @@
-# Manos Unidas VE — Frontend (Next.js + TypeScript + Supabase)
+# 🚀 Guía de Inicio Rápido (Quick Start)
 
-Plataforma para coordinar voluntarios e inventario (medicamentos, insumos
-quirúrgicos y comida) en los centros de acopio tras el terremoto en Venezuela.
+Sigue estos tres sencillos pasos para tener la aplicación ejecutándose en tu computadora localmente:
 
-Este paquete contiene **solo el frontend** (Next.js 14, App Router,
-TypeScript, Tailwind, framer-motion) ya conectado a los clientes de Supabase.
-Tú configuras el proyecto de Supabase (Auth + tablas) con el esquema de abajo.
+1. **Instalar Dependencias:**
+   ```bash
+   npm install
+   ```
+2. **Configurar Variables de Entorno:**
+   Crea un archivo `.env.local` en la raíz del proyecto y agrega tus claves de conexión:
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=https://tu-proyecto.supabase.co
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=tu-anon-key-de-supabase
+   ```
+3. **Iniciar Servidor de Desarrollo:**
+   ```bash
+   npm run dev
+   ```
+   *Abre [http://localhost:3000](http://localhost:3000) en tu navegador para ver la aplicación.*
 
-## 1. Crear el proyecto
+---
 
-```bash
-# Si prefieres partir de cero con create-next-app y luego pegar los archivos:
-npx create-next-app@14 manos-unidas-ve --typescript --tailwind --app --src-dir --import-alias "@/*"
-cd manos-unidas-ve
+# 🇻🇪 La Chinita — Coordinación de Ayuda Humanitaria
 
-# Si ya tienes esta carpeta descomprimida, solo entra en ella:
-cd ayuda-terremoto
-```
+> *"Orden en el caos, ayuda donde más se necesita."*
 
-## 2. Instalar dependencias
+**La Chinita** es una plataforma web moderna, intuitiva y sumamente eficiente diseñada para gestionar y trazar el flujo de donaciones, suministros y voluntariado en situaciones de emergencia humanitaria.
 
-```bash
-npm install
-```
+### 🌟 Propósito y Visión
+El software nació para brindar orden sistémico en momentos críticos. Su estructura está pensada para mitigar el caos administrativo en centros de acopio, asegurando que cada recurso donado sea catalogado y entregado de manera transparente a los afectados.
 
-(El `package.json` incluido ya trae: `@supabase/supabase-js`,
-`@supabase/ssr`, `framer-motion`, `lucide-react`, `clsx`.)
+### 🎯 Objetivos de Impacto
+* **Para la Iglesia de La Chiquinquirá:** Organizar de forma transparente las donaciones de medicamentos, insumos quirúrgicos y comida que ingresan a la parroquia, garantizando la trazabilidad desde la recepción hasta la entrega a hospitales y refugios.
+* **Para cualquier Centro de Acopio en el mundo:** Servir como una solución *open-source* lista para desplegar en minutos, capaz de unificar el censo de voluntarios y la contabilidad de inventario en cualquier parroquia, escuela o centro civil de ayuda.
 
-## 3. Variables de entorno
+---
 
-Copia `.env.local.example` a `.env.local` y completa con los datos de tu
-proyecto de Supabase (Project Settings → API):
+## 🛠️ Especificaciones Técnicas y Arquitectura
 
-```bash
-cp .env.local.example .env.local
-```
+La plataforma está desarrollada con estándares modernos de ingeniería de software para garantizar rapidez, escalabilidad y un rendimiento óptimo bajo alta concurrencia de usuarios:
 
-```
-NEXT_PUBLIC_SUPABASE_URL=https://TU-PROYECTO.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=tu-anon-key
-```
+* **Estructura del Frontend:** Desarrollado bajo **Next.js 14** empleando el **App Router** (`src/app`) para optimizar el renderizado y carga de páginas estáticas y dinámicas.
+* **Tipado Seguro:** Escrito enteramente en **TypeScript**, previniendo errores en tiempo de compilación y asegurando la consistencia de los datos del inventario y perfiles.
+* **Diseño Visual de Alto Impacto:** Sistema de estilos fluidos con **Tailwind CSS** que integra animaciones sutiles a través de **Framer Motion** y una interfaz moderna con efectos de desenfoque de fondo (*glassmorphism*).
+* **Base de Datos Relacional:** Configurada bajo la **4ta Forma Normal (4NF)** para evitar redundancias de información y garantizar la integridad referencial de los lotes y habilidades del voluntariado.
 
-## 4. Esquema de base de datos (ejecútalo en el SQL Editor de Supabase)
+---
 
-```sql
--- Perfiles con rol (organizador y despachador se crean manualmente aquí)
-create type rol_usuario as enum ('usuario', 'organizador', 'despachador');
+## 👥 Roles de la Plataforma
 
-create table perfiles (
-  id uuid primary key references auth.users(id) on delete cascade,
-  rol rol_usuario not null default 'usuario',
-  created_at timestamptz default now()
-);
-
--- Voluntarios (se registran desde el formulario público)
-create table voluntarios (
-  id uuid primary key references auth.users(id) on delete cascade,
-  nombre_completo text not null,
-  cedula text not null,
-  telefono text not null,
-  email text not null,
-  ciudad text not null,
-  disponibilidad text not null,
-  habilidades text not null,
-  experiencia_previa boolean default false,
-  vehiculo_propio boolean default false,
-  created_at timestamptz default now()
-);
-
--- Inventario por categoría
-create type categoria_inventario as enum ('medicamentos', 'insumos', 'comida');
-
-create table inventario (
-  id uuid primary key default gen_random_uuid(),
-  categoria categoria_inventario not null,
-  nombre text not null,
-  cantidad integer not null default 0,
-  unidad text default 'unidades',
-  lote text,
-  vencimiento date,
-  ubicacion text,
-  updated_at timestamptz default now()
-);
-
--- Registro diario de movimientos (ingresos y salidas)
-create type tipo_movimiento as enum ('ingreso', 'salida');
-
-create table movimientos (
-  id uuid primary key default gen_random_uuid(),
-  categoria categoria_inventario not null,
-  producto_nombre text not null,
-  tipo tipo_movimiento not null,
-  cantidad integer not null,
-  destino text,
-  responsable text,
-  created_at timestamptz default now()
-);
-
--- Trigger: cuando un usuario nuevo se autentica, crear su perfil "usuario"
-create function public.crear_perfil()
-returns trigger as $$
-begin
-  insert into public.perfiles (id, rol) values (new.id, 'usuario');
-  return new;
-end;
-$$ language plpgsql security definer;
-
-create trigger on_auth_user_created
-  after insert on auth.users
-  for each row execute procedure public.crear_perfil();
-```
-
-### Crear organizadores y despachadores
-
-1. Crea el usuario desde **Authentication → Users → Add user** en Supabase.
-2. Luego, en la tabla `perfiles`, cambia su `rol` a `organizador` o
-   `despachador` manualmente.
-
-### Políticas RLS recomendadas (resumen)
-
-- `voluntarios`: lectura pública, escritura solo del propio usuario (`auth.uid() = id`).
-- `inventario`: lectura pública; escritura solo si el perfil del usuario es
-  `organizador` (insertar) o `despachador` (actualizar cantidad).
-- `movimientos`: lectura pública; inserción solo `organizador`/`despachador`.
-
-## 5. Ejecutar en desarrollo
-
-```bash
-npm run dev
-```
-
-Abre `http://localhost:3000`.
-
-## 6. Estructura de carpetas
-
-```
-ayuda-terremoto/
-├─ public/
-│  └─ logo.png
-├─ src/
-│  ├─ app/
-│  │  ├─ layout.tsx
-│  │  ├─ page.tsx                 → Landing
-│  │  ├─ globals.css
-│  │  ├─ login/page.tsx
-│  │  ├─ registro/page.tsx        → Formulario de voluntario
-│  │  ├─ voluntarios/page.tsx     → Directorio público
-│  │  ├─ organizador/page.tsx     → Ingreso de inventario + voluntarios
-│  │  └─ despachador/page.tsx     → Salida de inventario + voluntarios
-│  ├─ components/
-│  │  ├─ ui/ (Button, Card, Input, Select, Badge, Logo, RibbonSignature)
-│  │  ├─ layout/ (Navbar, Footer)
-│  │  └─ dashboard/ (CategoriaTabs, MovementForm, InventoryTable,
-│  │                  MovementLog, VoluntarioCard, DashboardHeader)
-│  ├─ lib/
-│  │  ├─ supabase/client.ts
-│  │  ├─ supabase/server.ts
-│  │  └─ utils.ts
-│  └─ types/index.ts
-├─ tailwind.config.ts
-├─ next.config.js
-├─ package.json
-└─ .env.local.example
-```
-
-## Sistema de diseño
-
-- **Colores**: oro `#F2B705`, azul `#1A3FA0`, rojo `#D62839` (los tres tonos
-  del logo), fondo crema `#FBFAF6`, tinta `#1E2433`.
-- **Tipografía**: Spectral (display, cálida y serena) + Inter (texto e
-  interfaz).
-- **Elemento distintivo**: `RibbonSignature`, una cinta de tres trazos que se
-  dibuja al cargar la página, eco directo del gesto de la mano del logo.
+* **Voluntarios (`usuario`):** Registro público a través de un formulario con detalles de contacto, habilidades y disponibilidad horaria. Acceso al directorio general.
+* **Organizadores:** Encargados de ingresar productos (medicamentos, insumos quirúrgicos, alimentos), gestionando fechas de vencimiento, marcas y cantidades.
+* **Despachadores:** Encargados de registrar la salida de productos hacia destinos específicos, con validación de stock en tiempo real.
