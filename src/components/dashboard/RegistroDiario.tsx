@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Calendar, ArrowDownCircle, ArrowUpCircle } from "lucide-react";
+import { Calendar, ArrowDownCircle, ArrowUpCircle, FileSpreadsheet } from "lucide-react";
 import Card from "@/components/ui/Card";
-import Badge from "@/components/ui/Badge";
+import Button from "@/components/ui/Button";
 import { createClient } from "@/lib/supabase/client";
+import { exportarAExcel } from "@/lib/excel";
 
 interface RegistroFila {
   fecha: string;
@@ -42,13 +43,44 @@ export default function RegistroDiario() {
     return acc;
   }, {});
 
+  // Exportar Bitácora consolidada a Excel
+  function handleExportar() {
+    const columnas = {
+      fecha: "Fecha",
+      categoria: "Categoría",
+      producto: "Producto",
+      tipo_movimiento: "Tipo Movimiento",
+      cantidad_total: "Cantidad",
+      unidad: "Unidad"
+    };
+
+    const mapeados = registros.map((r) => ({
+      ...r,
+      tipo_movimiento: r.tipo_movimiento === "ingreso" ? "Ingreso" : "Egreso (Salida)"
+    }));
+
+    exportarAExcel(mapeados, columnas, "Bitacora_Movimientos", "Bitacora");
+  }
+
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center gap-2">
-        <Calendar className="text-azul" size={20} />
-        <h2 className="font-display text-xl font-semibold text-ink">
-          Registro Consolidado por Día
-        </h2>
+      {/* Header con título y botón de Exportar */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between w-full">
+        <div className="flex items-center gap-2">
+          <Calendar className="text-azul" size={20} />
+          <h2 className="font-display text-xl font-semibold text-ink">
+            Registro Consolidado por Día
+          </h2>
+        </div>
+        {!cargando && registros.length > 0 && (
+          <Button
+            variant="ghost"
+            onClick={handleExportar}
+            className="flex items-center gap-1.5 border border-ink/10 bg-white"
+          >
+            <FileSpreadsheet size={16} className="text-azul" /> Exportar Bitácora
+          </Button>
+        )}
       </div>
 
       {cargando ? (
@@ -62,7 +94,7 @@ export default function RegistroDiario() {
       ) : (
         <div className="flex flex-col gap-6">
           {Object.entries(agrupados).map(([fecha, filas]) => (
-            <Card key={fecha} className="overflow-hidden p-0">
+            <Card key={fecha} className="overflow-hidden p-0 shadow-soft">
               {/* Header de la Fecha */}
               <div className="bg-paper/50 border-b border-ink/8 px-6 py-4 flex items-center justify-between">
                 <span className="font-display text-base font-semibold text-ink">

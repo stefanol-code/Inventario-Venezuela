@@ -2,7 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { ClipboardList, Users, Calendar, Plus, ChevronLeft, ArrowRight } from "lucide-react";
+import {
+  ClipboardList,
+  Users,
+  Calendar,
+  Plus,
+  ChevronLeft,
+  ArrowRight,
+  HeartHandshake,
+  FileSpreadsheet
+} from "lucide-react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import CategoriaTabs from "@/components/dashboard/CategoriaTabs";
 import MovementForm from "@/components/dashboard/MovementForm";
@@ -10,10 +19,12 @@ import InventoryTable from "@/components/dashboard/InventoryTable";
 import MovementLog from "@/components/dashboard/MovementLog";
 import VoluntarioCard from "@/components/dashboard/VoluntarioCard";
 import RegistroDiario from "@/components/dashboard/RegistroDiario";
+import SolicitudesAyuda from "@/components/dashboard/SolicitudesAyuda";
+import StatsGrid from "@/components/dashboard/StatsGrid";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
-import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
+import { exportarAExcel } from "@/lib/excel";
 import {
   CATEGORIA_LABEL,
   type CategoriaInventario,
@@ -24,7 +35,7 @@ import {
 
 export default function OrganizadorPage() {
   const supabase = createClient();
-  const [vista, setVista] = useState<"inicio" | "inventario" | "voluntarios" | "registro-diario">("inicio");
+  const [vista, setVista] = useState<"inicio" | "inventario" | "voluntarios" | "registro-diario" | "solicitudes">("inicio");
   const [categoria, setCategoria] = useState<CategoriaInventario>("medicamentos");
   const [productos, setProductos] = useState<ProductoInventario[]>([]);
   const [movimientos, setMovimientos] = useState<MovimientoInventario[]>([]);
@@ -189,7 +200,6 @@ export default function OrganizadorPage() {
 
     if (prodData) {
       productoId = prodData.id;
-      // Actualizar campos específicos si se ingresan de nuevo
       await supabase
         .from("productos")
         .update({
@@ -306,6 +316,34 @@ export default function OrganizadorPage() {
     setEnviando(false);
   }
 
+  // Exportar Almacén Completo a Excel
+  function exportarInventario() {
+    const columnas = {
+      nombre: "Rubro",
+      categoria: "Categoría",
+      cantidad: "Stock",
+      unidad: "Unidad",
+      lote: "Lote",
+      vencimiento: "Vencimiento",
+      ubicacion: "Ubicación",
+      componente_activo: "Componente Activo",
+      concentracion: "Concentración",
+      presentacion: "Presentación",
+      es_pediatrico: "Pediátrico",
+      tipo_insumo: "Tipo Insumo",
+      descripcion: "Descripción",
+      medida: "Medida"
+    };
+
+    const mapeados = productos.map((p) => ({
+      ...p,
+      categoria: CATEGORIA_LABEL[p.categoria] || p.categoria,
+      es_pediatrico: p.es_pediatrico ? "Sí" : "No"
+    }));
+
+    exportarAExcel(mapeados, columnas, "Inventario_Stock_Almacen", "Inventario");
+  }
+
   return (
     <div className="min-h-screen bg-cream">
       <DashboardHeader rolEtiqueta="organizador" />
@@ -324,7 +362,7 @@ export default function OrganizadorPage() {
           </Button>
         )}
 
-        {/* 1. Vista Inicial de Bienvenida (Tarjetas Grandes) */}
+        {/* 1. Vista Inicial de Bienvenida (4 Tarjetas Grandes) */}
         {vista === "inicio" && (
           <div className="flex flex-col gap-8">
             <div className="text-center sm:text-left">
@@ -336,7 +374,7 @@ export default function OrganizadorPage() {
               </p>
             </div>
 
-            <div className="grid gap-6 sm:grid-cols-3 mt-4">
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 mt-4">
               {/* Tarjeta 1: Inventario */}
               <motion.div
                 whileHover={{ y: -6 }}
@@ -352,10 +390,33 @@ export default function OrganizadorPage() {
                     Ingresar Productos
                   </h3>
                   <p className="mt-2 flex-grow text-sm text-inkSoft leading-relaxed">
-                    Registra ingresos de donaciones, medicamentos, comida o insumos y actualiza el stock actual del centro.
+                    Registra ingresos de donaciones, medicamentos, comida o insumos quirúrgicos.
                   </p>
                   <div className="mt-4 flex items-center gap-1.5 text-xs font-semibold text-azul uppercase tracking-wider">
                     Gestionar stock <ArrowRight size={14} />
+                  </div>
+                </Card>
+              </motion.div>
+
+              {/* Tarjeta 2: Solicitudes de Ayuda */}
+              <motion.div
+                whileHover={{ y: -6 }}
+                transition={{ duration: 0.2 }}
+                onClick={() => setVista("solicitudes")}
+                className="cursor-pointer"
+              >
+                <Card className="flex h-full flex-col p-6 hover:shadow-soft border-l-4 border-l-gold bg-white/80">
+                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gold/10 text-gold-dark">
+                    <HeartHandshake size={22} />
+                  </div>
+                  <h3 className="font-display text-lg font-bold text-ink">
+                    Solicitudes de Ayuda
+                  </h3>
+                  <p className="mt-2 flex-grow text-sm text-inkSoft leading-relaxed">
+                    Registra y revisa solicitudes comunitarias y gestiona las ayudas necesarias.
+                  </p>
+                  <div className="mt-4 flex items-center gap-1.5 text-xs font-semibold text-gold-dark uppercase tracking-wider">
+                    Ver solicitudes <ArrowRight size={14} />
                   </div>
                 </Card>
               </motion.div>
@@ -367,40 +428,40 @@ export default function OrganizadorPage() {
                 onClick={() => setVista("registro-diario")}
                 className="cursor-pointer"
               >
-                <Card className="flex h-full flex-col p-6 hover:shadow-soft border-l-4 border-l-gold bg-white/80">
-                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gold/10 text-gold-dark">
+                <Card className="flex h-full flex-col p-6 hover:shadow-soft border-l-4 border-l-rojo bg-white/80">
+                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-rojo/10 text-rojo">
                     <Calendar size={22} />
                   </div>
                   <h3 className="font-display text-lg font-bold text-ink">
-                    Ver Bitácora de Movimientos
+                    Bitácora Diaria
                   </h3>
                   <p className="mt-2 flex-grow text-sm text-inkSoft leading-relaxed">
-                    Visualiza el historial unificado por día de todos los productos y cantidades ingresados o despachados.
+                    Historial consolidado por día de todos los movimientos de entradas y salidas.
                   </p>
-                  <div className="mt-4 flex items-center gap-1.5 text-xs font-semibold text-gold-dark uppercase tracking-wider">
+                  <div className="mt-4 flex items-center gap-1.5 text-xs font-semibold text-rojo uppercase tracking-wider">
                     Ver historial <ArrowRight size={14} />
                   </div>
                 </Card>
               </motion.div>
 
-              {/* Tarjeta 2: Voluntarios */}
+              {/* Tarjeta 4: Voluntarios */}
               <motion.div
                 whileHover={{ y: -6 }}
                 transition={{ duration: 0.2 }}
                 onClick={() => setVista("voluntarios")}
                 className="cursor-pointer"
               >
-                <Card className="flex h-full flex-col p-6 hover:shadow-soft border-l-4 border-l-rojo bg-white/80">
-                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-rojo/10 text-rojo">
+                <Card className="flex h-full flex-col p-6 hover:shadow-soft border-l-4 border-l-ink bg-white/80">
+                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-ink/5 text-inkSoft">
                     <Users size={22} />
                   </div>
                   <h3 className="font-display text-lg font-bold text-ink">
                     Registro de Voluntarios
                   </h3>
                   <p className="mt-2 flex-grow text-sm text-inkSoft leading-relaxed">
-                    Consulta la lista completa de voluntarios, su disponibilidad, experiencia y habilidades de apoyo.
+                    Directorio completo de voluntarios, habilidades y disponibilidades de apoyo.
                   </p>
-                  <div className="mt-4 flex items-center gap-1.5 text-xs font-semibold text-rojo uppercase tracking-wider">
+                  <div className="mt-4 flex items-center gap-1.5 text-xs font-semibold text-inkSoft uppercase tracking-wider">
                     Ver voluntarios <ArrowRight size={14} />
                   </div>
                 </Card>
@@ -416,18 +477,30 @@ export default function OrganizadorPage() {
             animate={{ opacity: 1 }}
             className="flex flex-col gap-6"
           >
-            {/* Cabecera con Categorías y Botón de Ingreso */}
+            {/* Cabecera con Categorías, Botón de Excel e Ingreso */}
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <CategoriaTabs value={categoria} onChange={setCategoria} />
               
-              <Button
-                variant="primary"
-                onClick={() => setMostrarModal(true)}
-                className="shrink-0 flex items-center gap-1.5 self-start sm:self-center"
-              >
-                <Plus size={16} /> Ingresar Producto
-              </Button>
+              <div className="flex gap-2 self-start sm:self-center">
+                <Button
+                  variant="ghost"
+                  onClick={exportarInventario}
+                  className="flex items-center gap-1.5 border border-ink/10 bg-white"
+                >
+                  <FileSpreadsheet size={16} className="text-azul" /> Exportar Stock
+                </Button>
+                <Button
+                  variant="primary"
+                  onClick={() => setMostrarModal(true)}
+                  className="flex items-center gap-1.5"
+                >
+                  <Plus size={16} /> Ingresar Producto
+                </Button>
+              </div>
             </div>
+
+            {/* Cuadrícula de Estadísticas Glassmorphism */}
+            <StatsGrid productos={productos} />
 
             {/* Formulario en Modal */}
             {mostrarModal && (
@@ -455,7 +528,17 @@ export default function OrganizadorPage() {
           </motion.div>
         )}
 
-        {/* 3. Sección de Directorio de Voluntarios */}
+        {/* 3. Sección de Solicitudes de Ayuda */}
+        {vista === "solicitudes" && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
+            <SolicitudesAyuda />
+          </motion.div>
+        )}
+
+        {/* 4. Sección de Directorio de Voluntarios */}
         {vista === "voluntarios" && (
           <motion.div
             initial={{ opacity: 0 }}
@@ -468,7 +551,7 @@ export default function OrganizadorPage() {
           </motion.div>
         )}
 
-        {/* 4. Sección de Bitácora Consolidada Diaria */}
+        {/* 5. Sección de Bitácora Consolidada Diaria */}
         {vista === "registro-diario" && (
           <motion.div
             initial={{ opacity: 0 }}
