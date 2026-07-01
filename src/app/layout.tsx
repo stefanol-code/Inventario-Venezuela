@@ -14,7 +14,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Manos Unidas VE · Coordinación de ayuda humanitaria",
+  title: "La Chinita",
   description:
     "Plataforma para organizar voluntarios, inventario de medicamentos, insumos y comida en los centros de acopio tras el terremoto en Venezuela.",
 };
