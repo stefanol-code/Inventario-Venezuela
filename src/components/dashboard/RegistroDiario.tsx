@@ -83,22 +83,22 @@ export default function RegistroDiario() {
                 <table className="w-full border-collapse text-left text-sm text-ink">
                   <thead>
                     <tr className="border-b border-ink/8 text-xs font-medium uppercase tracking-wider text-inkSoft">
-                      <th className="px-6 py-3">Categoría</th>
-                      <th className="px-6 py-3">Producto</th>
-                      <th className="px-6 py-3">Movimiento</th>
-                      <th className="px-6 py-3 text-right">Cantidad</th>
+                      <th className="px-4 sm:px-6 py-2.5 sm:py-3">Categoría</th>
+                      <th className="px-4 sm:px-6 py-2.5 sm:py-3">Producto</th>
+                      <th className="px-4 sm:px-6 py-2.5 sm:py-3">Movimiento</th>
+                      <th className="px-4 sm:px-6 py-2.5 sm:py-3 text-right">Cantidad</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-ink/5">
                     {filas.map((f, i) => (
                       <tr key={i} className="hover:bg-ink/[0.01]">
-                        <td className="px-6 py-3.5 font-medium">
+                        <td className="px-4 sm:px-6 py-3 sm:py-3.5 font-medium">
                           <span className="text-ink">{f.categoria}</span>
                         </td>
-                        <td className="px-6 py-3.5">
+                        <td className="px-4 sm:px-6 py-3 sm:py-3.5">
                           <span className="font-semibold text-inkSoft">{f.producto}</span>
                         </td>
-                        <td className="px-6 py-3.5">
+                        <td className="px-4 sm:px-6 py-3 sm:py-3.5">
                           {f.tipo_movimiento === "ingreso" ? (
                             <span className="inline-flex items-center gap-1.5 font-medium text-azul">
                               <ArrowDownCircle size={15} />
@@ -107,11 +107,11 @@ export default function RegistroDiario() {
                           ) : (
                             <span className="inline-flex items-center gap-1.5 font-medium text-rojo">
                               <ArrowUpCircle size={15} />
-                              Egreso (Salida)
+                              Egreso
                             </span>
                           )}
                         </td>
-                        <td className="px-6 py-3.5 text-right font-display font-medium text-ink">
+                        <td className="px-4 sm:px-6 py-3 sm:py-3.5 text-right font-display font-medium text-ink">
                           {f.tipo_movimiento === "ingreso" ? "+" : "-"}
                           {f.cantidad_total} <span className="text-xs text-inkSoft">{f.unidad}</span>
                         </td>

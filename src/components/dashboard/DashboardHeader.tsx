@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
-import { LogOut, Bell, AlertTriangle } from "lucide-react";
+import { LogOut, Bell, AlertTriangle, Users } from "lucide-react";
 import Logo from "@/components/ui/Logo";
 import Button from "@/components/ui/Button";
 import { createClient } from "@/lib/supabase/client";
@@ -77,12 +77,10 @@ export default function DashboardHeader({
 
     cargarAlertasVencimiento();
 
-    // Recargar alertas cada 5 minutos
     const interval = setInterval(cargarAlertasVencimiento, 5 * 60 * 1000);
     return () => clearInterval(interval);
   }, [supabase]);
 
-  // Cerrar dropdown al hacer clic afuera
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -97,8 +95,8 @@ export default function DashboardHeader({
     <header className="sticky top-0 z-50 border-b border-ink/8 bg-cream/90 backdrop-blur-md">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3.5">
         <Logo size={100} />
-        <div className="flex items-center gap-4">
-          <span className="hidden text-sm font-medium text-inkSoft sm:inline">
+        <div className="flex items-center gap-2 sm:gap-4">
+          <span className="hidden text-sm font-medium text-inkSoft md:inline">
             Panel de {rolEtiqueta}
           </span>
           
@@ -110,7 +108,7 @@ export default function DashboardHeader({
             >
               <Bell size={18} />
               {notificaciones.length > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-rojo text-[9px] font-bold text-white ring-2 ring-cream">
+                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rojo text-[9px] font-bold text-white ring-2 ring-cream">
                   {notificaciones.length}
                 </span>
               )}
@@ -118,7 +116,7 @@ export default function DashboardHeader({
 
             {/* Dropdown de Alertas */}
             {mostrarDropdown && (
-              <div className="absolute right-0 mt-2.5 w-80 rounded-xl2 border border-ink/10 bg-white/95 p-4 shadow-soft backdrop-blur-md">
+              <div className="absolute right-0 mt-2.5 w-72 sm:w-80 rounded-xl2 border border-ink/10 bg-white/95 p-4 shadow-soft backdrop-blur-md">
                 <div className="mb-3 border-b border-ink/8 pb-2">
                   <h3 className="font-display text-sm font-semibold text-ink">
                     Alertas de Vencimiento
@@ -152,12 +150,14 @@ export default function DashboardHeader({
           </div>
 
           <Link href="/voluntarios">
-            <Button variant="ghost" size="sm">
-              Voluntarios
+            <Button variant="ghost" size="sm" className="px-2.5 sm:px-3.5">
+              <Users size={16} className="sm:mr-1.5" />
+              <span className="hidden sm:inline">Voluntarios</span>
             </Button>
           </Link>
-          <Button variant="ghost" size="sm" onClick={salir}>
-            <LogOut size={15} /> Salir
+          <Button variant="ghost" size="sm" onClick={salir} className="px-2.5 sm:px-3.5 text-rojo hover:bg-rojo/5 hover:text-rojo">
+            <LogOut size={16} className="sm:mr-1.5" />
+            <span className="hidden sm:inline">Salir</span>
           </Button>
         </div>
       </div>

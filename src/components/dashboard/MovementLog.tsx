@@ -29,7 +29,7 @@ export default function MovementLog({
               initial={{ opacity: 0, x: -8 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: i * 0.03 }}
-              className="flex items-center gap-3 px-5 py-3 text-sm"
+              className="flex items-center gap-3 px-4 sm:px-5 py-3 text-sm"
             >
               {m.tipo === "ingreso" ? (
                 <ArrowDownCircle size={17} className="shrink-0 text-azul" />

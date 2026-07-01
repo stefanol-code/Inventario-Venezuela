@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { LogIn, LogOut, HeartHandshake, UserCheck } from "lucide-react";
 import Logo from "@/components/ui/Logo";
 import Button from "@/components/ui/Button";
 import { createClient } from "@/lib/supabase/client";
@@ -47,28 +48,32 @@ export default function Navbar() {
             Cómo funciona
           </Link>
         </nav>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-3">
           {user ? (
             <>
               <Link href="/registro-voluntario">
-                <Button variant="ghost" size="sm">
-                  Registrar perfil
+                <Button variant="ghost" size="sm" className="px-2.5 sm:px-3.5">
+                  <UserCheck size={16} className="sm:mr-1.5" />
+                  <span className="hidden sm:inline">Registrar perfil</span>
                 </Button>
               </Link>
-              <Button variant="primary" size="sm" onClick={handleLogout}>
-                Cerrar sesión
+              <Button variant="primary" size="sm" onClick={handleLogout} className="px-2.5 sm:px-3.5">
+                <LogOut size={16} className="sm:mr-1.5" />
+                <span className="hidden sm:inline">Cerrar sesión</span>
               </Button>
             </>
           ) : (
             <>
               <Link href="/login">
-                <Button variant="ghost" size="sm">
-                  Iniciar sesión
+                <Button variant="ghost" size="sm" className="px-2.5 sm:px-3.5">
+                  <LogIn size={16} className="sm:mr-1.5" />
+                  <span className="hidden sm:inline">Iniciar sesión</span>
                 </Button>
               </Link>
               <Link href="/registro">
-                <Button variant="primary" size="sm">
-                  Ser voluntario
+                <Button variant="primary" size="sm" className="px-2.5 sm:px-3.5">
+                  <HeartHandshake size={16} className="sm:mr-1.5" />
+                  <span className="hidden sm:inline">Ser voluntario</span>
                 </Button>
               </Link>
             </>

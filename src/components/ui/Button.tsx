@@ -20,9 +20,9 @@ const variants = {
 };
 
 const sizes = {
-  sm: "text-sm px-3.5 py-1.5",
-  md: "text-sm px-5 py-2.5",
-  lg: "text-base px-7 py-3.5",
+  sm: "text-xs sm:text-sm px-3 sm:px-3.5 py-1 sm:py-1.5",
+  md: "text-xs sm:text-sm px-4 sm:px-5 py-2 sm:py-2.5",
+  lg: "text-sm sm:text-base px-5 sm:px-7 py-2.5 sm:py-3.5",
 };
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
