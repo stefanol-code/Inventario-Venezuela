@@ -45,7 +45,13 @@ export default function VoluntarioCard({
             <Phone size={14} /> {voluntario.telefono}
           </span>
           <span className="flex items-center gap-2">
-            <Wrench size={14} /> {voluntario.habilidades}
+            <Wrench size={14} />{" "}
+            {voluntario.voluntario_habilidades
+              ? voluntario.voluntario_habilidades
+                  .map((vh) => vh.habilidades?.nombre)
+                  .filter(Boolean)
+                  .join(", ")
+              : voluntario.habilidades}
           </span>
           {voluntario.vehiculo_propio && (
             <span className="flex items-center gap-2">
@@ -54,11 +60,20 @@ export default function VoluntarioCard({
           )}
         </div>
 
-        <div className="mt-auto pt-2">
-          <Badge tone="azul">
-            {DISPONIBILIDAD_LABEL[voluntario.disponibilidad] ??
-              voluntario.disponibilidad}
-          </Badge>
+        <div className="mt-auto flex flex-wrap gap-1.5 pt-2">
+          {voluntario.voluntario_disponibilidades &&
+          voluntario.voluntario_disponibilidades.length > 0 ? (
+            voluntario.voluntario_disponibilidades.map((vd, i) => (
+              <Badge tone="azul" key={i}>
+                {vd.disponibilidades?.nombre}
+              </Badge>
+            ))
+          ) : (
+            <Badge tone="azul">
+              {DISPONIBILIDAD_LABEL[voluntario.disponibilidad ?? ""] ??
+                voluntario.disponibilidad}
+            </Badge>
+          )}
         </div>
       </Card>
     </motion.div>

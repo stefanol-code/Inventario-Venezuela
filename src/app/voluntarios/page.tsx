@@ -19,9 +19,17 @@ export default function VoluntariosPage() {
     async function cargar() {
       const { data } = await supabase
         .from("voluntarios")
-        .select("*")
+        .select(`
+          *,
+          voluntario_habilidades (
+            habilidades (nombre)
+          ),
+          voluntario_disponibilidades (
+            disponibilidades (nombre)
+          )
+        `)
         .order("created_at", { ascending: false });
-      setVoluntarios(data ?? []);
+      setVoluntarios((data as any) ?? []);
       setCargando(false);
     }
     cargar();
@@ -29,12 +37,19 @@ export default function VoluntariosPage() {
 
   const filtrados = useMemo(() => {
     const q = busqueda.toLowerCase();
-    return voluntarios.filter(
-      (v) =>
-        v.nombre_completo.toLowerCase().includes(q) ||
-        v.ciudad.toLowerCase().includes(q) ||
-        v.habilidades.toLowerCase().includes(q)
-    );
+    return voluntarios.filter((v) => {
+      const nombreMatches = v.nombre_completo.toLowerCase().includes(q);
+      const ciudadMatches = v.ciudad.toLowerCase().includes(q);
+      
+      const habsText = v.voluntario_habilidades
+        ?.map((vh) => vh.habilidades?.nombre)
+        .filter(Boolean)
+        .join(", ")
+        .toLowerCase() || "";
+      const habilidadesMatches = habsText.includes(q);
+
+      return nombreMatches || ciudadMatches || habilidadesMatches;
+    });
   }, [voluntarios, busqueda]);
 
   return (

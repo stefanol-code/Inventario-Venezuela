@@ -9,11 +9,13 @@ export interface Voluntario {
   telefono: string;
   email: string;
   ciudad: string;
-  disponibilidad: string;
-  habilidades: string;
+  disponibilidad?: string; // compatible con código viejo
+  habilidades?: string; // compatible con código viejo
   experiencia_previa: boolean;
   vehiculo_propio: boolean;
   created_at: string;
+  voluntario_habilidades?: { habilidades: { nombre: string } }[];
+  voluntario_disponibilidades?: { disponibilidades: { nombre: string } }[];
 }
 
 export interface ProductoInventario {
@@ -26,6 +28,14 @@ export interface ProductoInventario {
   vencimiento?: string | null;
   ubicacion: string;
   updated_at: string;
+  // Campos específicos de la reestructuración
+  componente_activo?: string | null;
+  concentracion?: string | null;
+  presentacion?: string | null;
+  es_pediatrico?: boolean;
+  tipo_insumo?: string | null;
+  descripcion?: string | null;
+  medida?: string | null;
 }
 
 export interface MovimientoInventario {

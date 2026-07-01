@@ -32,7 +32,7 @@ export default function LoginPage() {
     });
 
     if (authError || !data.user) {
-      setError("Correo o contraseña incorrectos.");
+      setError(authError?.message ?? "Correo o contraseña incorrectos.");
       setCargando(false);
       return;
     }
